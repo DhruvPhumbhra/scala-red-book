@@ -57,19 +57,19 @@ class Cafe {
     (cup, Charge(cc, cup.price))
   }
 
-  def buyCoffees(cc: CreditCard, numCoffees: Int): (List[Coffee], Charge) = {
-    val purchases: List[(Coffee, Charge)] = List.fill(numCoffees)(buyCoffee(cc)) // get coffee + payment info for N coffees
-    val (coffees, charges): (List[Coffee], List[Charge]) = purchases.unzip // separate coffees + payment info pairs
+  def buyCoffees(cc: CreditCard, numCoffees: Int): (Array[Coffee], Charge) = {
+    val purchases: Array[(Coffee, Charge)] = Array.fill(numCoffees)(buyCoffee(cc)) // get coffee + payment info for N coffees
+    val (coffees, charges): (Array[Coffee], Array[Charge]) = purchases.unzip // separate coffees + payment info pairs
 
     (coffees, charges.reduce((c1,c2) => c1.combine(c2))) // add up all the separate payments for the coffees into one big payment
   }
 
-  def buyCoffeesTwo(cc: CreditCard, numCoffees: Int): (List[Coffee], Charge) = {
-    val purchases: List[(Coffee, Charge)] =
+  def buyCoffeesTwo(cc: CreditCard, numCoffees: Int): (Array[Coffee], Charge) = {
+    val purchases: Array[(Coffee, Charge)] =
       (1 to numCoffees)
-        .toList
+        .toArray
         .map(_ => buyCoffee(cc))
-    val (coffees, charges): (List[Coffee], List[Charge]) = purchases.unzip
+    val (coffees, charges): (Array[Coffee], Array[Charge]) = purchases.unzip
 
     (coffees, charges.reduce((c1,c2) => c1.combine(c2)))
   }

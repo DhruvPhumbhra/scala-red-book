@@ -44,20 +44,20 @@ object Ch2_IsSorted {
 
   def main(args: Array[String]): Unit = {
     /* V1 Assertions */
-    val shouldBeSortedInts = isSorted[Int](List(1, 2, 3, 4).toArray, _ > _)
+    val shouldBeSortedInts = isSorted[Int](Array(1, 2, 3, 4), _ > _)
     assert(shouldBeSortedInts)
-    val shouldBeSortedStringLengths = isSorted[String](List("A", "AB", "ABC").toArray, _.length > _.length)
+    val shouldBeSortedStringLengths = isSorted[String](Array("A", "AB", "ABC"), _.length > _.length)
     assert(shouldBeSortedStringLengths)
 
-    val shouldNotBeSortedInts = isSorted[Int](List(2, 4, 3, 1).toArray, _ > _)
+    val shouldNotBeSortedInts = isSorted[Int](Array(2, 4, 3, 1), _ > _)
     assert(!shouldNotBeSortedInts)
-    val shouldNotBeSortedStringLengths = isSorted[String](List("AB", "A", "ABC").toArray, _.length > _.length)
+    val shouldNotBeSortedStringLengths = isSorted[String](Array("AB", "A", "ABC"), _.length > _.length)
     assert(!shouldNotBeSortedStringLengths)
 
     /* V2 Assertions */
-    val shouldBeSorted_v2 = isSorted_v2[Int](List(1, 2, 3, 4).toArray, _ > _)
+    val shouldBeSorted_v2 = isSorted_v2[Int](Array(1, 2, 3, 4), _ > _)
     assert(shouldBeSorted_v2)
-    val shouldNotBeSorted_v2 = isSorted_v2[Int](List(2, 4, 3, 1).toArray, _ > _)
+    val shouldNotBeSorted_v2 = isSorted_v2[Int](Array(2, 4, 3, 1), _ > _)
     assert(!shouldNotBeSorted_v2)
   }
 }
