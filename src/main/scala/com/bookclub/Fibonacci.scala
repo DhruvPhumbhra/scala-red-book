@@ -107,11 +107,11 @@ object AllFibSolutions extends App {
 
   def absolutelyInsaneSolution(n: Int): Int = {
     var l = scala.collection.mutable.Buffer(0, 1)
-    List.fill(n)(l.addOne(l.zip(l.tail).map { case (x, y) => x + y }.last)).flatten.dropRight(1).last
+    scala.collection.immutable.List.fill(n)(l.addOne(l.zip(l.tail).map { case (x, y) => x + y }.last)).flatten.dropRight(1).last
   }
 
-  lazy val allSolutions: List[(Int => Int, String)] =
-    List(
+  lazy val allSolutions: scala.collection.immutable.List[(Int => Int, String)] =
+    scala.collection.immutable.List(
       fibonacci _ -> "fibonacci",
       nonTailRecFib _ -> "nonTailRecFib",
       iterativeFib _ -> "iterativeFib",

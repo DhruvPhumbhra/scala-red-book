@@ -1,6 +1,8 @@
 package com.bookclub
 
-import com.bookclub.List.sum
+import com.bookclub.List.{foldRight, sum}
+
+import scala.annotation.tailrec
 //import com.bookclub.ListExercises._
 
 sealed trait List[+A]
@@ -30,6 +32,52 @@ object List {
       case Nil => throw new RuntimeException("oops")
       case Cons(_, tail) => tail
     }
+  }
+
+  def setHead[A](l: List[A], a: A): List[A] = {
+    l match {
+      case Nil => throw new RuntimeException("oops")
+      case Cons(_, tail) => Cons(a, tail)
+    }
+  }
+
+  // List(1, 2, 3, 4) drop(2)(list ...) => List(3, 4)
+
+  @tailrec
+  def drop[A](l: List[A], n: Int): List[A] = {
+//    if (n <= 0) l
+//    else
+      l match {
+      case _ if n <= 0 => l
+      case Nil => Nil
+      case Cons(_, tail) =>  drop(tail, n - 1)
+    }
+//  }
+}
+
+  def dropWhile[A](l: List[A])(f: A => Boolean): List[A] = {
+    l match {
+      case Nil => Nil
+      case Cons(head, tail) if f(head) => dropWhile(tail)(f)
+      case _ => l
+    }
+  }
+
+  def append[A](a1: List[A], a2: List[A]): List[A] = a1 match {
+    case Nil => a2
+    case Cons(h, t) => Cons(h, append(t, a2))
+  }
+
+  def init[A](l: List[A]): List[A] = {
+    l match {
+      case Nil | Cons(_, Nil) => Nil
+      case Cons(head, tail) => Cons(head, init(tail))
+    }
+  }
+
+  def foldRight[A, B](as: List[A], acc: B)(f: (A, B) => B): B = as match {
+    case Nil => acc
+    case Cons(head, tail) => f(head, foldRight(tail, acc)(f))
   }
 }
 
@@ -62,6 +110,19 @@ object UsingLists extends App {
 //  Nil match { case Cons(h,_) => h }
 //  List(1, 2, 3) match { case Cons(_, t) => t }
 //  List(1, 2, 3) match { case Nil => 42 }
+}
+
+
+object TestStuff extends App {
+//  val xs: List[Int] = List(1, 2, 3, 4, 5)
+//  val ex1: (Int => Boolean) => List[Int] = dropWhile(xs)
+  //(x => x < 4)
+//  println(ex1(x => x < 4))
+//  println(ex1)
+
+//  println(foldRight(List(1, 2, 3), 0)((x,y) => x + y))
+  println(foldRight(List(1, 3, 2), 0)(_ + _))
+
 }
 
 // Cassidy's solution
