@@ -1,6 +1,6 @@
 package com.bookclub
 
-import com.bookclub.List.{foldRight, sum}
+import com.bookclub.List.{foldLeft, foldRight, sum}
 
 import scala.annotation.tailrec
 //import com.bookclub.ListExercises._
@@ -16,12 +16,17 @@ object List {
     case Nil => 0
     case Cons(x,xs) => x + sum(xs)
   }
+  def sumFoldLeft(ints: List[Int]): Int =
+    foldLeft(ints, 0)(_ + _)
 
   def product(ds: List[Double]): Double = ds match {
     case Nil => 1.0
     case Cons(0.0, _) => 0.0
     case Cons(x, xs) => x * product(xs)
   }
+
+  def productFoldLeft(ds: List[Double]): Double =
+    foldLeft(ds, 1.0)((acc, head) => acc * head)
 
   def apply[A](as: A*): List[A] = // (as: Seq[A]): List[A]
     if (as.isEmpty) Nil
@@ -79,20 +84,43 @@ object List {
     case Nil => acc
     case Cons(head, tail) => f(head, foldRight(tail, acc)(f))
   }
+
+  def length[A](as: List[A]): Int =
+    foldRight(as, 0)((_, acc) => 1 + acc)
+
+  def foldLeft[A, B](as: List[A], z: B)(f: (B, A) => B): B = as match {
+    case Nil => z
+    case Cons(head, tail) => foldLeft(tail, f(z, head))(f)
+  }
+
+  def reverse[A](l: List[A], soFar: List[A]): List[A] =
+    foldLeft(l, Nil: List[A])((acc, head) => Cons(head, acc))
+//    l match {
+//    case Nil => soFar
+//    case Cons(head, tail) => reverse(tail, Cons(head, soFar))
+//  }
+
+
 }
 
-//class MyList[A] extends List[A] {
-//  def foo(x: A): A = ???
-//}
+object MoreLists extends App {
+//  (1 + 2 + (3 + 0))
+//  Cons(1, Cons(2, (Cons(3, Nil))))
+  println(foldLeft(List(1,2,3), Nil:List[Int])((b, a) => Cons(a,b)))
+  println(foldRight(List(1,2,3), Nil:List[Int])(Cons(_, _)))
+
+  println(foldRight(List(1, 2, 3), 0)(_ - _))
+  println(foldLeft(List(1, 2, 3), 0)(_ - _))
+
+//  val listInt = List(1, 2, 3, 4, 5);
+//  println(foldLeft(listInt, 0)((x, y) => x + y));
+}
 
 object UsingLists extends App {
 
   val ex1: List[Double] = Nil
   val ex2: List[Int] = Cons(1, Nil)
   val ex3: List[String] = Cons("a", Cons("b", Nil))
-
-//  val y = new MyList[Double]
-//  y.foo(5.0)
 
   val x = List(1, 2, 3, 4, 5) match {
     case Cons(x, Cons(2, Cons(4, _))) => x
