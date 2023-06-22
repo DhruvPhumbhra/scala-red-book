@@ -1,15 +1,108 @@
 package com.bookclub
 
-import com.bookclub.List.{foldLeft, foldRight, sum}
+import com.bookclub.List._
 
 import scala.annotation.tailrec
 //import com.bookclub.ListExercises._
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 sealed trait List[+A]
 
-case object Nil extends List[Nothing]
+/*
+   Exercise: Override the `toString` method on `Nil` and `Cons` of our list implementation
+   To get you started, here are the function signatures
+   ```
+     case object Nil extends List[Nothing] {
+      final override def toString: String = ???
+    }
 
-case class Cons[+A](head: A, tail: List[A]) extends List[A]
+    case class Cons[+A](head: A, tail: List[A]) extends List[A] {
+      final override def toString: String = ???
+    }
+   ```
+   Examples:
+   object Stringing extends App {
+      println(Cons(1, Cons(2, Cons(3, Nil)))) --> List(1, 2, 3)
+      println(Cons(1, Nil))                   --> List(1)
+      println(Nil)                            --> List()
+   }
+
+   **For the nerds**- Bonus points if your solution is tail recursive
+ */
+
+case object Nil extends List[Nothing] {
+  final override def toString: String = "List()"
+}
+
+case class Cons[+A](head: A, tail: List[A]) extends List[A] {
+
+//  case object Nil extends List[Nothing] {
+//    final override def toString: String = "List()"
+//  }
+
+//  case class Cons[+A](head: A, tail: List[A]) extends List[A] {
+//
+//    private def printList[A](a: A, l: List[A]): String = {
+//      (a, l) match {
+//        case (a, Nil) => s"$a"
+//        case (a, Cons(head, Nil)) => s"$a, $head"
+//        case (_, Cons(head, tail)) => s"$a, ${printList(head, tail)}"
+//      }
+//    }
+//    final override def toString: String = {
+//      "List(" + printList(head, tail) + ")"
+//    }
+//  }
+
+
+  final override def toString: String = {
+    def loop(tail: List[A]): String = {
+      tail match {
+        case Nil => ")"
+        case Cons(h, Nil) => s", $h)"
+        case Cons(h, t) => s", $h${loop(t)}"
+      }
+    }
+
+    s"List($head${loop(tail)}"
+  }
+
+//  final override def toString: String = {
+//    def commaDelimitedStringify(l: List[A]): String = {
+//      l match {
+//        case Cons(last, Nil) => last.toString
+//        case Cons(head, tail) => head.toString + ", " + commaDelimitedStringify(tail)
+//      }
+//    }
+//
+//    @tailrec
+//    def commaDelimitedStringifyTailRec(acc: String, l: List[A]): String = {
+//      l match {
+//        case Cons(last, Nil) => acc + last.toString // last element is special because it's not followed by a comma
+//        case Cons(head, tail) => commaDelimitedStringifyTailRec(acc + head.toString + ", ", tail)
+//      }
+//    }
+//
+//    commaDelimitedStringifyTailRec("List(", Cons(head, tail)) + ")"
+//    foldLeft(Cons(head, tail), "List(")((acc, x) => acc + x.toString + ", ").dropRight(2) + ")" // 1, 2, 3,
+//  }
+}
 
 object List {
   def sum(ints: List[Int]): Int = ints match {
@@ -93,14 +186,106 @@ object List {
     case Cons(head, tail) => foldLeft(tail, f(z, head))(f)
   }
 
-  def reverse[A](l: List[A], soFar: List[A]): List[A] =
+  def reverse[A](l: List[A]): List[A] =
     foldLeft(l, Nil: List[A])((acc, head) => Cons(head, acc))
 //    l match {
 //    case Nil => soFar
 //    case Cons(head, tail) => reverse(tail, Cons(head, soFar))
 //  }
 
+  // this doesn't work, don't use it
+  def reverseUsingFoldRight[A](l: List[A], soFar: List[A] = Nil): List[A] =
+    l match {
+      case Nil => soFar
+      case Cons(head, tail) => Cons(head, reverseUsingFoldRight(tail, soFar))
+    }
 
+  def foldRightUsingFoldLeft[A, B](as: List[A], acc: B)(f: (A, B) => B): B =
+    foldLeft(reverse(as), acc)((b, a) => f(a, b))
+
+  def foldLeftUsingFoldRight[A, B](as: List[A], acc: B)(f: (B, A) => B): B =
+    foldRight(as, (b: B) => b)((a, g) => b => g(f(b, a)))(acc)
+
+  def appendWithFoldRight[A](list: List[A], item: A) =
+    foldRight(list, Cons(item, Nil))((acc, tail) => Cons(acc, tail))
+
+  def map[A,B](as: List[A])(f: A => B): List[B] =
+    foldRightUsingFoldLeft(as, Nil: List[B])((x, y) => Cons(f(x), y))
+
+  def filter[A](as: List[A])(f: A => Boolean): List[A] =
+    foldRightUsingFoldLeft(as, Nil: List[A])((h, t) => if(f(h)) Cons(h, t) else t)
+
+}
+
+object AppendExercise extends App {
+  def appendUsingFoldRight[A](a1: List[A], a2: List[A]): List[A] = foldRight(a1, a2)(Cons(_,_))
+
+  def appendUsingFoldLeft[A](a1: List[A], a2: List[A]): List[A] = foldLeft(reverse(a1), a2)((b, a) => Cons(a,b))
+
+  val listOne: List[Int] = List(1,2,3)
+  val listTwo: List[Int] = List(4,5,6)
+  val listA: List[Char] = List('a','b','c')
+
+  println(appendUsingFoldRight(listOne,listTwo))
+  println(appendUsingFoldLeft(listOne,listA))
+
+}
+
+object add1 extends App {
+  def add1(alist: List[Int]): List[Int] =
+    foldRight(alist, Nil: List[Int])((x, y) => Cons(x + 1, y))
+
+  def doubleToString(alist: List[Double]): List[String] =
+    foldRight(alist, Nil: List[String])((h, t) => Cons(h.toString, t))
+
+  // Lauren
+  def addOne(list: List[Int]): List[Int] =
+    reverse(foldLeft(list, Nil: List[Int])((acc: List[Int], head: Int) => Cons(head + 1, acc)))
+
+
+  val listEmpty: List[Int] = List()
+  val listInt: List[Int] = List(1,2,3)
+
+  println(listEmpty)
+  println(add1(listEmpty))
+
+  println(listInt)
+  println(add1(listInt))
+  println(addOne(listInt))
+
+}
+
+// Exercise 3.17: Write a function that turns each value in a List[Double] into a String. You can use the expression d.toString to convert some d: Double to a String.
+object doubleToString extends App {
+  def doubleToString(alist: List[Double]): List[String] =
+    foldRight(alist, Nil:List[String])((h, t) => Cons(h.toString, t))
+
+  def doubleToStringUsingFoldLeft(alist: List[Double]): List[String] =
+    reverse(foldLeft(alist, Nil:List[String])((t, h) => Cons(h.toString, t)))
+
+
+
+  val listDouble: List[Double] = List(1.2, 2.3, 3.4)
+  val stringList: List[String] = doubleToString(listDouble)
+
+  println(doubleToString(listDouble))
+  println(doubleToStringUsingFoldLeft(listDouble))
+}
+
+object MapAndFilterExercise extends App {
+  val listInt: List[Int] = List(1,2,3)
+
+  println(map(listInt)(_ + 1))
+  println(map(listInt)(_.toString))
+
+  println(filter(List(1, 2, 3, 4, 5, 8))(_ % 2 == 0))
+
+}
+
+object EvenMoreLists extends App {
+//  println(foldRightUsingFoldLeft(List(1, 2, 3), Nil: List[Int])(Cons(_,_)))
+  println(reverseUsingFoldRight(List(1, 2, 3)))
+  println(foldLeftUsingFoldRight(List(1, 2, 3), Nil: List[Int])((b, a) => Cons(a, b)))
 }
 
 object MoreLists extends App {
@@ -130,9 +315,9 @@ object UsingLists extends App {
     case _ => 101
   }
 
-  val a: List[Int] = Cons(1, Cons(2, Nil)) // List(1, 2)
+  val a: List[Int] = Cons(1, Cons(2, Cons(3, Nil))) // List(1, 2)
 
-  println(x)
+  println(a)
 
 //  List(1, 2, 3) match { case _ => 42 }
 //  Nil match { case Cons(h,_) => h }
