@@ -206,16 +206,100 @@ object List {
   def foldLeftUsingFoldRight[A, B](as: List[A], acc: B)(f: (B, A) => B): B =
     foldRight(as, (b: B) => b)((a, g) => b => g(f(b, a)))(acc)
 
-  def appendWithFoldRight[A](list: List[A], item: A) =
-    foldRight(list, Cons(item, Nil))((acc, tail) => Cons(acc, tail))
+  def appendUsingFoldRight[A](a1: List[A], a2: List[A]): List[A] = foldRight(a1, a2)(Cons(_,_))
+
+  def appendUsingFoldLeft[A](a1: List[A], a2: List[A]): List[A] = foldLeft(reverse(a1), a2)((b, a) => Cons(a,b))
+
+  def concatLists[A](list: List[List[A]]): List[A] = foldRight(list, Nil: List[A])(appendUsingFoldRight)
 
   def map[A,B](as: List[A])(f: A => B): List[B] =
     foldRightUsingFoldLeft(as, Nil: List[B])((x, y) => Cons(f(x), y))
 
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] =
+    concatLists(map(as)(f))
+
   def filter[A](as: List[A])(f: A => Boolean): List[A] =
     foldRightUsingFoldLeft(as, Nil: List[A])((h, t) => if(f(h)) Cons(h, t) else t)
 
+  def filterUsingFlatmap[A](as: List[A])(f: A => Boolean): List[A] =
+    flatMap(as)(a => if(f(a)) List(a) else Nil)
+
+  def addListPairs(l1: List[Int], l2: List[Int]): List[Int] = (l1, l2) match {
+//    case (Cons(h1, t1), Nil) => Cons(h1, t1)
+//    case (Nil, Cons(h2, t2)) => Cons(h2, t2)
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(h1 + h2, addListPairs(t1, t2))
+    case (_, _) => Nil
+  }
+
+  def zipWith[A, B, C](l1: List[A], l2: List[B])(f: (A, B) => C): List[C] = (l1, l2) match {
+    case (Cons(h1, t1), Cons(h2, t2)) => Cons(f(h1, h2), zipWith(t1, t2)(f))
+    case (_, _) => Nil
+  }
+
 }
+
+object AddListPairsTest extends App {
+  println(addListPairs(List(1, 2, 3), List(4, 5, 6)))
+  println(addListPairs(List(1, 2, 3), List(4, 5, 6, 7)))
+  println(addListPairs(List(1, 2, 3), List(4, 5, 6, 7, 8)))
+  println(zipWith(List(1, 2, 3, 4, 5), List(6, 7))(_ + _))
+}
+
+object FlatMapExercise extends App {
+
+  def append[A](a1: List[A], a2: List[A]): List[A] = foldRight(a1, a2)(Cons(_,_))
+
+  def concatenate[A](alist: List[List[A]]): List[A] = alist match {
+    case Nil => Nil
+    case Cons(head, tail) => append((head), concatenate(tail))
+  }
+
+  def flatMap[A,B](as: List[A])(f: A => List[B]): List[B] = as match {
+    case Nil => Nil
+    case Cons(head, tail) => append(f(head), flatMap(tail)(f))
+  }
+
+  println(flatMap(List(1,2,3))(i => List(i, i)))
+  println(flatMap(List(1.1, 2.2, 3.3))(i => List(i, i * 2)))
+  println(flatMap(List('a', 'b', 'c'))(i => List(i, i.toString + i)))
+
+}
+
+
+
+
+// Excercise 3.15: Hard: Write a function that concatenates a list of lists into a single list. Its runtime should be linear in the total length of all lists. Try to use functions we have already defined.
+
+object ConcatenateListsExercise extends App {
+  def append[A](a1: List[A], a2: List[A]): List[A] = foldRight(a1, a2)(Cons(_,_))
+
+  def concatenate[A](alist: List[List[A]]): List[A] =  alist match {
+    case Nil => List()
+    case Cons(head, tail) => append((head), concatenate(tail))
+  }
+
+  // James
+  def concatLists[A](list: List[List[A]]): List[A] = foldRight(list, Nil: List[A])(append)
+
+  println(concatenate(List(List(1,2,3), List('a','b','c'), List(1.1, 2.2, 3.3, 4.4))));
+
+
+  flatMap(List(1,2,3))(i => List(i, i)) // List(1,1,2,2,3,3)
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 object AppendExercise extends App {
   def appendUsingFoldRight[A](a1: List[A], a2: List[A]): List[A] = foldRight(a1, a2)(Cons(_,_))
