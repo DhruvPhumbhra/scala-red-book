@@ -5,71 +5,13 @@ import com.bookclub.List._
 import scala.annotation.tailrec
 //import com.bookclub.ListExercises._
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 sealed trait List[+A]
-
-/*
-   Exercise: Override the `toString` method on `Nil` and `Cons` of our list implementation
-   To get you started, here are the function signatures
-   ```
-     case object Nil extends List[Nothing] {
-      final override def toString: String = ???
-    }
-
-    case class Cons[+A](head: A, tail: List[A]) extends List[A] {
-      final override def toString: String = ???
-    }
-   ```
-   Examples:
-   object Stringing extends App {
-      println(Cons(1, Cons(2, Cons(3, Nil)))) --> List(1, 2, 3)
-      println(Cons(1, Nil))                   --> List(1)
-      println(Nil)                            --> List()
-   }
-
-   **For the nerds**- Bonus points if your solution is tail recursive
- */
 
 case object Nil extends List[Nothing] {
   final override def toString: String = "List()"
 }
 
 case class Cons[+A](head: A, tail: List[A]) extends List[A] {
-
-//  case object Nil extends List[Nothing] {
-//    final override def toString: String = "List()"
-//  }
-
-//  case class Cons[+A](head: A, tail: List[A]) extends List[A] {
-//
-//    private def printList[A](a: A, l: List[A]): String = {
-//      (a, l) match {
-//        case (a, Nil) => s"$a"
-//        case (a, Cons(head, Nil)) => s"$a, $head"
-//        case (_, Cons(head, tail)) => s"$a, ${printList(head, tail)}"
-//      }
-//    }
-//    final override def toString: String = {
-//      "List(" + printList(head, tail) + ")"
-//    }
-//  }
-
 
   final override def toString: String = {
     def loop(tail: List[A]): String = {
@@ -236,6 +178,35 @@ object List {
     case (_, _) => Nil
   }
 
+  // take the first n elements from a list
+  def take[A](l: List[A], n: Int): List[A] = reverse(drop(reverse(l), length(l) - n))
+
+}
+
+object TestTake extends App {
+  println(take(List(1, 2, 3, 4), 2)) // List(1, 2)
+}
+
+object ListSubsequence extends App {
+  def hasSubsequence[A](sup: collection.immutable.List[A], sub: collection.immutable.List[A]): Boolean = {
+    sup match {
+      case _ :: tail => if (sup.take(sub.length) == sub) true else hasSubsequence (tail, sub)
+      case collection.immutable.List() => false
+    }
+  }
+
+  // true cases
+  println(hasSubsequence(collection.immutable.List(1, 2, 3, 4), collection.immutable.List(1, 2, 3)))
+  println(hasSubsequence(collection.immutable.List(1, 2, 3, 4), collection.immutable.List(2, 3)))
+  println(hasSubsequence(collection.immutable.List(1, 2, 3, 4), collection.immutable.List(4)))
+  println(hasSubsequence(collection.immutable.List(1, 2, 3, 4), collection.immutable.List()))
+
+
+  // false cases
+  println(hasSubsequence(collection.immutable.List(1, 2, 3, 4), collection.immutable.List(1, 4)))
+  println(hasSubsequence(collection.immutable.List(1, 2, 3, 4), collection.immutable.List(4, 5)))
+  println(hasSubsequence(collection.immutable.List(1, 2, 3, 4), collection.immutable.List(5)))
+  println(hasSubsequence(collection.immutable.List(), collection.immutable.List(4)))
 }
 
 object AddListPairsTest extends App {
