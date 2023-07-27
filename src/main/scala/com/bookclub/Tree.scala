@@ -1,21 +1,12 @@
 package com.bookclub
 
-import com.bookclub.Tree.mapTree
+import com.bookclub.Tree._
 
 sealed trait Tree[+A]
 case class Leaf[A](value: A) extends Tree[A]
 case class Branch[A](left: Tree[A], right: Tree[A]) extends Tree[A]
 
 object Tree {
-  def size[A](tree: Tree[A]): Int = tree match {
-    case Leaf(value) => 1
-    case Branch(left, right) => size(left) + size(right) + 1
-  }
-
-  def maxTree(tree: Tree[Int]): Int = tree match {
-    case Leaf(value) => value
-    case Branch(left, right) => maxTree(left) max maxTree(right)
-  }
 
   def treeDepth[A](tree: Tree[A]): Int = tree match {
     case Leaf(_) => 0
@@ -26,6 +17,45 @@ object Tree {
     case Leaf(value) => Leaf(f(value))
     case Branch(left, right) => Branch(mapTree(left)(f), mapTree(right)(f))
   }
+
+  def size[A](tree: Tree[A]): Int = tree match {
+    case Leaf(_) => 1
+    case Branch(left, right) => 1 + (size(left) + size(right)) // (Int, Int) => Int
+  }
+
+  def maxTree(tree: Tree[Int]): Int = tree match {
+    case Leaf(value) => value
+    case Branch(left, right) => maxTree(left) max maxTree(right)
+  }
+
+  def myFold[A, B](tree: Tree[A])(acc: A => B)(f: (B, B) => B): B  = tree match {
+    case Leaf(value) => acc(value)
+    case Branch(left, right) => f(myFold(left)(acc)(f), myFold(right)(acc)(f))
+  }
+
+  def sizeUsingFold[A](tree: Tree[A]): Int =
+    myFold(tree)(_ => 1)((l, r) => 1 + l + r)
+
+  def treeDepthUsingFold[A](tree: Tree[A]): Int = myFold(tree)(z => 0)((l, r) => 1 + (l max r))
+
+  def maxUsingFold(tree: Tree[Int]): Int = myFold(tree)(value => value)(_ max _)
+
+}
+
+object TestFold extends App {
+  val tree: Tree[Int] = Branch(
+    Branch(Branch(Branch(Branch(Leaf(1), Leaf(14)), Leaf(14)), Leaf(14)), Leaf(14)),
+    Branch(Leaf(256), Leaf(12))
+  )
+
+  println(size(tree))
+  println(sizeUsingFold(tree))
+
+  println(treeDepth(tree))
+  println(treeDepthUsingFold(tree))
+
+  println(maxTree(tree))
+  println(maxUsingFold(tree))
 }
 
 object MaxTreeTest extends App {
