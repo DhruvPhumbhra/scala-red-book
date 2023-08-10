@@ -36,9 +36,17 @@ object Tree {
   def sizeUsingFold[A](tree: Tree[A]): Int =
     myFold(tree)(_ => 1)((l, r) => 1 + l + r)
 
-  def treeDepthUsingFold[A](tree: Tree[A]): Int = myFold(tree)(z => 0)((l, r) => 1 + (l max r))
+  def treeDepthUsingFold[A](tree: Tree[A]): Int = myFold(tree)(_ => 0)((l, r) => 1 + (l max r))
 
   def maxUsingFold(tree: Tree[Int]): Int = myFold(tree)(value => value)(_ max _)
+
+
+  /* List implementation of map
+  def map[A,B](as: List[A])(f: A => B): List[B] =
+    foldRightUsingFoldLeft(as, Nil: List[B])((x, y) => Cons(f(x), y))
+   */
+  def mapUsingFold[A, B](tree: Tree[A])(f: A => B): Tree[B] =
+    myFold(tree)(a => Leaf(f(a)): Tree[B])((x, y) => Branch(x, y))
 
 }
 
@@ -48,14 +56,17 @@ object TestFold extends App {
     Branch(Leaf(256), Leaf(12))
   )
 
-  println(size(tree))
-  println(sizeUsingFold(tree))
+//  println(size(tree))
+//  println(sizeUsingFold(tree))
+//
+//  println(treeDepth(tree))
+//  println(treeDepthUsingFold(tree))
+//
+//  println(maxTree(tree))
+//  println(maxUsingFold(tree))
 
-  println(treeDepth(tree))
-  println(treeDepthUsingFold(tree))
-
-  println(maxTree(tree))
-  println(maxUsingFold(tree))
+  println(mapTree(tree)(_ + 1))
+  println(mapUsingFold(tree)(_ + 1))
 }
 
 object MaxTreeTest extends App {
